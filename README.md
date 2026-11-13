@@ -20,6 +20,8 @@
   </p>
 
   <p>
+    <a href="https://github.com/p1e7r0/snitch/releases/latest"><strong>Scarica l'app</strong></a>
+    ·
     <a href="#per-iniziare">Per iniziare</a>
     ·
     <a href="#uso">Uso</a>
@@ -99,11 +101,23 @@ Il codice è diviso in due moduli:
 ### Prerequisiti
 
 - macOS 15 o successivo.
-- Toolchain Swift 6.2 o successiva (inclusa in Xcode 26).
+- Per l'app già compilata: un Mac con Apple Silicon.
+- Per compilare dai sorgenti: toolchain Swift 6.2 o successiva (inclusa in Xcode 26).
 - Un Confluence raggiungibile in HTTPS e un **personal access token**: Snitch si autentica con l'intestazione `Authorization: Bearer`, cioè con i token personali di Confluence Data Center.
 - Il permesso di modificare la pagina che conterrà le segnalazioni.
 
 ### Installazione
+
+#### Scarica l'app
+
+1. Scarica `Snitch-1.0.dmg` dalla [pagina delle release](https://github.com/p1e7r0/snitch/releases/latest).
+2. Apri l'immagine disco e trascina Snitch nella cartella Applicazioni.
+3. Avvia Snitch. Al primo avvio macOS lo blocca, perché l'app non è notarizzata da Apple: apri Impostazioni di Sistema → Privacy e sicurezza, scorri fino all'avviso su Snitch e scegli **Apri comunque**.
+
+> [!NOTE]
+> L'app distribuita ha una firma locale, senza identità di sviluppatore. Dopo un aggiornamento macOS chiede quindi di nuovo il permesso di registrazione dello schermo.
+
+#### Compila dai sorgenti
 
 ```sh
 git clone https://github.com/p1e7r0/snitch.git
@@ -122,7 +136,7 @@ Per ottenere un'immagine disco da distribuire:
 ./Scripts/make-dmg.sh
 ```
 
-Il risultato è `build/Snitch-<versione>.dmg`, con l'app e il collegamento ad Applicazioni.
+Il risultato è `build/Snitch-<versione>.dmg`, con l'app e il collegamento ad Applicazioni. Per ottenere una firma locale senza identità, come nelle release, imposta `SNITCH_SIGNING_IDENTITY=-` prima del comando.
 
 ### Configurazione
 
