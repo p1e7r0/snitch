@@ -7,6 +7,7 @@ actor FakeConfluence: ConfluenceService {
     var attachments: [String: Data] = [:]
     var uploadCount = 0
     var updateCount = 0
+    var lastMessage: String?
     private var concurrentEdit: (@Sendable (String) -> String)?
     private var shouldLoseNextUpdateResponse = false
 
@@ -38,6 +39,7 @@ actor FakeConfluence: ConfluenceService {
         self.page.storage = storage
         self.page.version += 1
         updateCount += 1
+        lastMessage = message
         if shouldLoseNextUpdateResponse {
             shouldLoseNextUpdateResponse = false
             throw ConfluenceError.network("timeout")
@@ -100,6 +102,18 @@ actor FakeConfluence: ConfluenceService {
             with: Fixture.lastRow + expectedRow(identifier: 5, for: report)
         ))
         #expect(await confluence.page.version == 7)
+        #expect(await confluence.lastMessage == "Snitch: Bug 5 in «Carrello pagamenti»")
+    }
+
+    @Test func writesStatusAndVersionMessageInEnglishOnAnEnglishPage() async throws {
+        let (report, store) = try makeQueuedReport()
+        let confluence = FakeConfluence(storage: Fixture.englishPage)
+
+        let result = try await ReportSubmitter(service: confluence).submit(report, imageDirectory: store.directory(for: report))
+
+        #expect(result == SubmissionResult(identifier: 1))
+        #expect(await confluence.page.storage.contains(Fixture.englishOpenStatus))
+        #expect(await confluence.lastMessage == "Snitch: Bug 1 in “Carrello pagamenti”")
     }
 
     @Test func keepsChangesPublishedByOthersInTheMeantime() async throws {

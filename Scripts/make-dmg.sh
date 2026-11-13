@@ -45,4 +45,4 @@ fi
 hdiutil verify -quiet "$disk_image"
 
 osascript -l JavaScript -e 'ObjC.import("AppKit"); function run(argumentList) { const icon = $.NSImage.alloc.initWithContentsOfFile(argumentList[0]); $.NSWorkspace.sharedWorkspace.setIconForFileOptions(icon, argumentList[1], 0); }' "$icon_file" "$disk_image"
-echo "Creato: $disk_image"
+echo "Created: $disk_image"

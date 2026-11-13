@@ -17,6 +17,7 @@ public struct NewBugRow: Equatable, Sendable {
 public struct BugPageInsertion: Equatable, Sendable {
     public let storage: String
     public let identifier: Int
+    public let language: PageLanguage
 }
 
 public enum BugPageError: Error, Equatable {
@@ -32,22 +33,23 @@ enum ColumnKind: Sendable, CaseIterable {
     case images
     case history
 
-    var title: String {
+    func title(in language: PageLanguage) -> String {
+        let vocabulary = language.vocabulary
         switch self {
         case .identifier:
             return "ID"
         case .status:
-            return "Stato"
+            return vocabulary.statusColumnTitle
         case .kind:
-            return "Tipo"
+            return vocabulary.kindColumnTitle
         case .area:
-            return "Area"
+            return vocabulary.areaColumnTitle
         case .description:
-            return "Descrizione"
+            return vocabulary.descriptionColumnTitle
         case .images:
-            return "Immagini"
+            return vocabulary.imagesColumnTitle
         case .history:
-            return "Storia"
+            return vocabulary.historyColumnTitle
         }
     }
 
@@ -72,8 +74,8 @@ enum ColumnKind: Sendable, CaseIterable {
         self != .history
     }
 
-    init?(headerText: String) {
-        guard let column = Self.allCases.first(where: { $0.title.lowercased() == headerText.lowercased() }) else {
+    init?(headerText: String, language: PageLanguage) {
+        guard let column = Self.allCases.first(where: { $0.title(in: language).lowercased() == headerText.lowercased() }) else {
             return nil
         }
         self = column
@@ -96,30 +98,30 @@ enum BugStatus: Sendable, CaseIterable {
         }
     }
 
-    var title: String {
+    func title(in language: PageLanguage) -> String {
         switch self {
         case .open:
-            return "Aperto"
+            return language.vocabulary.openStatusTitle
         case .inProgress:
-            return "In corso"
+            return language.vocabulary.inProgressStatusTitle
         case .resolved:
-            return "Risolto"
+            return language.vocabulary.resolvedStatusTitle
         }
     }
 
-    var legend: String {
+    func legend(in language: PageLanguage) -> String {
         switch self {
         case .open:
-            return "da fare"
+            return language.vocabulary.openStatusLegend
         case .inProgress:
-            return "qualcuno ci sta lavorando"
+            return language.vocabulary.inProgressStatusLegend
         case .resolved:
-            return "fatto e verificato"
+            return language.vocabulary.resolvedStatusLegend
         }
     }
 
-    var macro: String {
-        "<ac:structured-macro ac:name=\"status\" ac:schema-version=\"1\"><ac:parameter ac:name=\"colour\">\(colour)</ac:parameter><ac:parameter ac:name=\"title\">\(title)</ac:parameter></ac:structured-macro>"
+    func macro(in language: PageLanguage) -> String {
+        "<ac:structured-macro ac:name=\"status\" ac:schema-version=\"1\"><ac:parameter ac:name=\"colour\">\(colour)</ac:parameter><ac:parameter ac:name=\"title\">\(title(in: language))</ac:parameter></ac:structured-macro>"
     }
 }
 
@@ -131,6 +133,7 @@ struct TableRow: Sendable {
 
 struct BugTable: Sendable {
     let columns: [ColumnKind?]
+    let language: PageLanguage
     let headerRow: TableRow
     let dataRows: [TableRow]
     let firstTrailingBlankIndex: Int
@@ -146,7 +149,9 @@ struct BugTable: Sendable {
 }
 
 public struct BugPage: Sendable {
-    public static let requiredColumnTitles = ColumnKind.allCases.filter(\.isRequired).map(\.title)
+    public static func requiredColumnTitles(in language: PageLanguage) -> [String] {
+        ColumnKind.allCases.filter(\.isRequired).map { $0.title(in: language) }
+    }
 
     private let scanner: StorageScanner
     private let table: BugTable?
@@ -159,6 +164,10 @@ public struct BugPage: Sendable {
 
     public var hasTable: Bool {
         table != nil
+    }
+
+    public var language: PageLanguage? {
+        table?.language
     }
 
     public var rowCount: Int {
@@ -203,7 +212,7 @@ public struct BugPage: Sendable {
         }
         let highestIdentifier = table.dataRows.compactMap { identifier(of: $0, in: table) }.max() ?? 0
         let newIdentifier = highestIdentifier + 1
-        var insertedText = BugRowRenderer.render(row, identifier: newIdentifier, columns: table.columns)
+        var insertedText = BugRowRenderer.render(row, identifier: newIdentifier, in: table)
         let blankIndex = table.firstTrailingBlankIndex
         let replacedRange: Range<Int>
         let bodyRows = ([table.headerRow] + table.dataRows).filter { $0.sectionName != "thead" }
@@ -221,7 +230,11 @@ public struct BugPage: Sendable {
         var bytes = Array(scanner.bytes[..<replacedRange.lowerBound])
         bytes.append(contentsOf: Array(insertedText.utf8))
         bytes.append(contentsOf: scanner.bytes[replacedRange.upperBound...])
-        return BugPageInsertion(storage: String(decoding: bytes, as: UTF8.self), identifier: newIdentifier)
+        return BugPageInsertion(
+            storage: String(decoding: bytes, as: UTF8.self),
+            identifier: newIdentifier,
+            language: table.language
+        )
     }
 
     private func identifier(of row: TableRow, in table: BugTable) -> Int? {
@@ -240,13 +253,13 @@ public struct BugPage: Sendable {
 enum BugRowRenderer {
     static let thumbnailWidth = 150
 
-    static func render(_ row: NewBugRow, identifier: Int, columns: [ColumnKind?]) -> String {
-        let cells = columns.map { column -> String in
+    static func render(_ row: NewBugRow, identifier: Int, in table: BugTable) -> String {
+        let cells = table.columns.map { column -> String in
             switch column {
             case .identifier:
                 return "<td>\(identifier)</td>"
             case .status:
-                return "<td><div class=\"content-wrapper\">\(BugStatus.open.macro)</div></td>"
+                return "<td><div class=\"content-wrapper\">\(BugStatus.open.macro(in: table.language))</div></td>"
             case .kind:
                 return "<td>\(StorageText.escaped(row.kind.rawValue))</td>"
             case .area:
@@ -360,8 +373,14 @@ struct TableBuilder {
         guard let headerRow = rows.first else {
             return nil
         }
-        let columns = headerRow.cellRanges.map { ColumnKind(headerText: scanner.plainText(in: $0)) }
-        guard ColumnKind.allCases.filter(\.isRequired).allSatisfy({ columns.contains($0) }) else {
+        let headerTexts = headerRow.cellRanges.map { scanner.plainText(in: $0) }
+        let requiredColumns = ColumnKind.allCases.filter(\.isRequired)
+        let recognizedHeader = PageLanguage.allCases
+            .map { language in
+                (language: language, columns: headerTexts.map { ColumnKind(headerText: $0, language: language) })
+            }
+            .first { header in requiredColumns.allSatisfy { header.columns.contains($0) } }
+        guard let recognizedHeader else {
             return nil
         }
         let dataRows = Array(rows.dropFirst())
@@ -371,7 +390,8 @@ struct TableBuilder {
             firstTrailingBlankIndex -= 1
         }
         return BugTable(
-            columns: columns,
+            columns: recognizedHeader.columns,
+            language: recognizedHeader.language,
             headerRow: headerRow,
             dataRows: dataRows,
             firstTrailingBlankIndex: firstTrailingBlankIndex,

@@ -14,22 +14,22 @@ if [ -d "$queue_directory" ]; then
 fi
 
 if [ "$pending_count" -gt 0 ] && [ "${1:-}" != "--force" ]; then
-    echo "Ci sono $pending_count segnalazioni in coda non ancora inviate: verranno cancellate con i loro screenshot."
-    read -r -p "Disinstallare comunque? [s/N] " answer
-    if [ "$answer" != "s" ] && [ "$answer" != "S" ]; then
-        echo "Disinstallazione annullata."
+    echo "There are $pending_count queued reports not sent yet: they will be deleted with their screenshots."
+    read -r -p "Uninstall anyway? [y/N] " answer
+    if [ "$answer" != "y" ] && [ "$answer" != "Y" ]; then
+        echo "Uninstall cancelled."
         exit 1
     fi
 fi
 
-pkill -x Snitch && echo "Snitch chiuso."
+pkill -x Snitch && echo "Snitch quit."
 
 if [ -d "$installed_bundle" ]; then
-    rm -rf "$installed_bundle" && echo "Rimosso: $installed_bundle"
+    rm -rf "$installed_bundle" && echo "Removed: $installed_bundle"
 fi
 
 if [ -d "$data_directory" ]; then
-    rm -rf "$data_directory" && echo "Rimossi coda e screenshot locali: $data_directory"
+    rm -rf "$data_directory" && echo "Removed local queue and screenshots: $data_directory"
 fi
 
 removed_token_count=0
@@ -37,15 +37,15 @@ while security delete-generic-password -s "$keychain_service" >/dev/null 2>&1; d
     removed_token_count=$((removed_token_count + 1))
 done
 if [ "$removed_token_count" -gt 0 ]; then
-    echo "Rimossi $removed_token_count token dal Portachiavi."
+    echo "Removed $removed_token_count tokens from the Keychain."
 fi
 
 if defaults delete "$bundle_identifier" >/dev/null 2>&1; then
-    echo "Rimosse le preferenze."
+    echo "Removed the preferences."
 fi
 
 if tccutil reset ScreenCapture "$bundle_identifier" >/dev/null 2>&1; then
-    echo "Revocato il permesso di registrazione dello schermo."
+    echo "Revoked the screen recording permission."
 fi
 
-echo "Disinstallazione completata."
+echo "Uninstall complete."

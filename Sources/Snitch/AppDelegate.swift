@@ -4,6 +4,7 @@ import SwiftUI
 
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private let settings = AppSettings()
+    private let launchLanguage = AppLanguage.selected
     private let notifier = Notifier()
     private let hotKey = GlobalHotKey()
     private var coordinator: QueueCoordinator?
@@ -23,8 +24,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             try store.prepare()
         } catch {
             Alerts.run(
-                title: "Snitch non può partire",
-                text: "Non riesco a creare la cartella della coda: \(error.localizedDescription)"
+                title: String(localized: "Snitch cannot start"),
+                text: String(localized: "Could not create the queue folder: \(error.localizedDescription)")
             )
             NSApp.terminate(nil)
             return
@@ -86,7 +87,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     private func showSettings() {
         if settingsWindow == nil {
-            let model = SettingsModel(settings: settings)
+            let model = SettingsModel(settings: settings, launchLanguage: launchLanguage)
+            model.onRestart = { [weak self] in
+                self?.restart()
+            }
             model.onTokenSaved = { [weak self] in
                 self?.coordinator?.retryNow()
             }
@@ -103,7 +107,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             let hostingController = NSHostingController(rootView: SettingsView(model: model))
             hostingController.sizingOptions = [.preferredContentSize]
             let window = NSWindow(contentViewController: hostingController)
-            window.title = "Impostazioni di Snitch"
+            window.title = String(localized: "Snitch settings")
             window.styleMask = [.titled, .closable]
             window.isReleasedWhenClosed = false
             window.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
@@ -114,6 +118,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         NSApp.activate(ignoringOtherApps: true)
         settingsWindow?.makeKeyAndOrderFront(nil)
         settingsWindow?.orderFrontRegardless()
+    }
+
+    private func restart() {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/bin/sh")
+        process.arguments = [
+            "-c",
+            "while kill -0 \"$0\" 2>/dev/null; do sleep 0.1; done; open \"$1\"",
+            String(ProcessInfo.processInfo.processIdentifier),
+            Bundle.main.bundlePath,
+        ]
+        guard (try? process.run()) != nil else {
+            return
+        }
+        NSApp.terminate(nil)
     }
 
     private func setUpLaunchAtLoginOnFirstRun() {
@@ -134,7 +153,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         let applicationMenu = NSMenu()
         applicationMenu.addItem(
-            withTitle: "Esci da Snitch",
+            withTitle: String(localized: "Quit Snitch"),
             action: #selector(NSApplication.terminate(_:)),
             keyEquivalent: "q"
         )
@@ -142,21 +161,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         applicationItem.submenu = applicationMenu
         mainMenu.addItem(applicationItem)
 
-        let editMenu = NSMenu(title: "Modifica")
-        editMenu.addItem(withTitle: "Annulla", action: Selector(("undo:")), keyEquivalent: "z")
-        let redoItem = editMenu.addItem(withTitle: "Ripristina", action: Selector(("redo:")), keyEquivalent: "z")
+        let editMenu = NSMenu(title: String(localized: "Edit"))
+        editMenu.addItem(withTitle: String(localized: "Undo"), action: Selector(("undo:")), keyEquivalent: "z")
+        let redoItem = editMenu.addItem(withTitle: String(localized: "Redo"), action: Selector(("redo:")), keyEquivalent: "z")
         redoItem.keyEquivalentModifierMask = [.command, .shift]
         editMenu.addItem(.separator())
-        editMenu.addItem(withTitle: "Taglia", action: #selector(NSText.cut(_:)), keyEquivalent: "x")
-        editMenu.addItem(withTitle: "Copia", action: #selector(NSText.copy(_:)), keyEquivalent: "c")
-        editMenu.addItem(withTitle: "Incolla", action: #selector(NSText.paste(_:)), keyEquivalent: "v")
-        editMenu.addItem(withTitle: "Seleziona tutto", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
+        editMenu.addItem(withTitle: String(localized: "Cut"), action: #selector(NSText.cut(_:)), keyEquivalent: "x")
+        editMenu.addItem(withTitle: String(localized: "Copy"), action: #selector(NSText.copy(_:)), keyEquivalent: "c")
+        editMenu.addItem(withTitle: String(localized: "Paste"), action: #selector(NSText.paste(_:)), keyEquivalent: "v")
+        editMenu.addItem(withTitle: String(localized: "Select all"), action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
         let editItem = NSMenuItem()
         editItem.submenu = editMenu
         mainMenu.addItem(editItem)
 
-        let windowMenu = NSMenu(title: "Finestra")
-        windowMenu.addItem(withTitle: "Chiudi", action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w")
+        let windowMenu = NSMenu(title: String(localized: "Window"))
+        windowMenu.addItem(withTitle: String(localized: "Close"), action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w")
         let windowItem = NSMenuItem()
         windowItem.submenu = windowMenu
         mainMenu.addItem(windowItem)

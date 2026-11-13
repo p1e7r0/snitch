@@ -2,14 +2,14 @@ import AppKit
 
 let arguments = CommandLine.arguments
 guard arguments.count == 3 else {
-    FileHandle.standardError.write(Data("Uso: make-icon.swift <immagine sorgente> <cartella .iconset>\n".utf8))
+    FileHandle.standardError.write(Data("Usage: make-icon.swift <source image> <.iconset folder>\n".utf8))
     exit(1)
 }
 let sourceURL = URL(fileURLWithPath: arguments[1])
 let iconsetURL = URL(fileURLWithPath: arguments[2])
 
 guard let artwork = NSImage(contentsOf: sourceURL), let artworkRepresentation = artwork.representations.first else {
-    FileHandle.standardError.write(Data("Immagine non leggibile: \(sourceURL.path)\n".utf8))
+    FileHandle.standardError.write(Data("Unreadable image: \(sourceURL.path)\n".utf8))
     exit(1)
 }
 artwork.size = NSSize(width: artworkRepresentation.pixelsWide, height: artworkRepresentation.pixelsHigh)
@@ -122,7 +122,7 @@ for pointSize in [16, 32, 128, 256, 512] {
         let suffix = scaleFactor == 2 ? "@2x" : ""
         let fileURL = iconsetURL.appending(path: "icon_\(pointSize)x\(pointSize)\(suffix).png")
         guard let data = renderIcon(pixelSize: pointSize * scaleFactor) else {
-            FileHandle.standardError.write(Data("Impossibile disegnare l'icona a \(pointSize) punti\n".utf8))
+            FileHandle.standardError.write(Data("Unable to draw the icon at \(pointSize) points\n".utf8))
             exit(1)
         }
         try data.write(to: fileURL)

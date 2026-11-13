@@ -11,6 +11,7 @@ import Testing
         let page = BugPage(storage: Fixture.page)
 
         #expect(page.hasTable)
+        #expect(page.language == .italian)
         #expect(page.rowCount == 4)
         #expect(page.areaNames == ["Elenco ordini", "Carrello & pagamenti", "Profilo"])
     }
@@ -19,6 +20,7 @@ import Testing
         let page = BugPage(storage: Fixture.pageWithoutTable)
 
         #expect(!page.hasTable)
+        #expect(page.language == nil)
         #expect(page.areaNames.isEmpty)
         #expect(throws: BugPageError.tableNotFound) {
             try page.inserting(makeRow("Bug", fileName: "snitch-a-1.png"))
@@ -99,15 +101,56 @@ import Testing
         #expect(insertion.storage == "<table><thead>\(Fixture.headerRow)</thead><tbody>\(expectedRow)</tbody></table>")
     }
 
-    @Test func templateProducesAnEmptyTableReadyForTheFirstRow() throws {
-        let storage = PageTemplate.storage()
+    @Test func writesTheStatusInTheLanguageOfTheTableHeader() throws {
+        let page = BugPage(storage: Fixture.englishPage)
+
+        let insertion = try page.inserting(makeRow("First", fileName: "snitch-h-1.png", areaName: "Profile"))
+
+        #expect(page.language == .english)
+        #expect(insertion.language == .english)
+        #expect(insertion.storage == "<table><tbody>\(Fixture.englishHeaderRow)<tr><td>1</td><td><div class=\"content-wrapper\">\(Fixture.englishOpenStatus)</div></td><td>Bug</td><td>Profile</td><td>First</td><td><div class=\"content-wrapper\"><p><ac:image ac:thumbnail=\"true\" ac:width=\"150\"><ri:attachment ri:filename=\"snitch-h-1.png\" /></ac:image></p></div></td><td><br /></td></tr></tbody></table>")
+    }
+
+    @Test func ignoresTablesWhoseRequiredColumnsMixLanguages() {
+        let storage = "<table><tbody><tr><th>ID</th><th>Stato</th><th>Type</th><th>Area</th><th>Description</th><th>Immagini</th></tr></tbody></table>"
+
+        #expect(!BugPage(storage: storage).hasTable)
+    }
+
+    @Test func leavesColumnsTitledInTheOtherLanguageEmpty() throws {
+        let headerRow = "<tr><th>Status</th><th>id</th><th>STATO</th><th>Tipo</th><th>Area</th><th>Descrizione</th><th>Immagini</th></tr>"
+        let page = BugPage(storage: "<table><tbody>\(headerRow)</tbody></table>")
+
+        let insertion = try page.inserting(makeRow("Bug", fileName: "snitch-i-1.png"))
+
+        #expect(insertion.language == .italian)
+        #expect(insertion.storage.contains("\(headerRow)<tr><td><br /></td><td>1</td><td><div class=\"content-wrapper\">\(Fixture.openStatus)</div></td><td>Bug</td>"))
+    }
+
+    @Test func englishTemplateProducesAnEmptyEnglishTable() throws {
+        let storage = PageTemplate.storage(language: .english)
         let page = BugPage(storage: storage)
 
         #expect(page.hasTable)
+        #expect(page.language == .english)
+        #expect(page.rowCount == 0)
+        #expect(storage.contains(Fixture.englishHeaderRow))
+        #expect(storage.contains("\(Fixture.englishOpenStatus) to do"))
+        #expect(PageTemplate.columnTitles(in: .english) == ["ID", "Status", "Type", "Area", "Description", "Images", "History"])
+        #expect(BugPage.requiredColumnTitles(in: .english) == ["ID", "Status", "Type", "Area", "Description", "Images"])
+    }
+
+    @Test func templateProducesAnEmptyTableReadyForTheFirstRow() throws {
+        let storage = PageTemplate.storage(language: .italian)
+        let page = BugPage(storage: storage)
+
+        #expect(page.hasTable)
+        #expect(page.language == .italian)
         #expect(page.rowCount == 0)
         #expect(storage.contains("<th>ID</th><th>Stato</th><th>Tipo</th><th>Area</th><th>Descrizione</th><th>Immagini</th><th>Storia</th>"))
         #expect(storage.contains("<col style=\"width: 45.0%;\" />"))
-        #expect(BugPage.requiredColumnTitles == ["ID", "Stato", "Tipo", "Area", "Descrizione", "Immagini"])
+        #expect(storage.contains("\(Fixture.openStatus) da fare"))
+        #expect(BugPage.requiredColumnTitles(in: .italian) == ["ID", "Stato", "Tipo", "Area", "Descrizione", "Immagini"])
 
         let insertion = try page.inserting(makeRow("Primo", fileName: "snitch-g-1.png", kind: .feature, areaName: "Profilo"))
         let updatedPage = BugPage(storage: insertion.storage)

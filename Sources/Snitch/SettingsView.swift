@@ -35,6 +35,7 @@ final class SettingsModel {
     var hostsWithToken: Set<String> = []
     var tokenMessage = ""
     var launchAtLogin: Bool
+    var language: AppLanguage
     var newPageTitle = ""
     var newPageParentAddress = ""
     var creationMessage = ""
@@ -42,10 +43,14 @@ final class SettingsModel {
 
     @ObservationIgnored var onRecordingChange: (Bool) -> Void = { _ in }
     @ObservationIgnored var onTokenSaved: () -> Void = {}
+    @ObservationIgnored var onRestart: () -> Void = {}
+    @ObservationIgnored private let launchLanguage: AppLanguage
 
-    init(settings: AppSettings) {
+    init(settings: AppSettings, launchLanguage: AppLanguage) {
         self.settings = settings
+        self.launchLanguage = launchLanguage
         launchAtLogin = LaunchAtLogin.isEnabled
+        language = AppLanguage.selected
         refreshTokenState()
     }
 
@@ -66,11 +71,11 @@ final class SettingsModel {
     func addDestination() {
         let address = newAddress.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let reference = PageReference(pageAddress: address) else {
-            listMessage = "Indirizzo non riconosciuto: incolla l'indirizzo https della pagina come compare nel browser."
+            listMessage = String(localized: "Address not recognized: paste the https address of the page as it appears in the browser.")
             return
         }
         guard settings.destination(for: reference) == nil else {
-            listMessage = "Questa pagina è già nell'elenco."
+            listMessage = String(localized: "This page is already in the list.")
             return
         }
         let destination = settings.addDestination(address: address)
@@ -92,11 +97,11 @@ final class SettingsModel {
             do {
                 let summary = try await settings.refreshDestination(withIdentifier: identifier)
                 if !summary.hasTable {
-                    destinationMessages[identifier] = "Collegata. \(FailureDescription.missingTableText)"
+                    destinationMessages[identifier] = String(localized: "Connected. \(FailureDescription.missingTableText)")
                 } else if summary.areaNames.isEmpty {
-                    destinationMessages[identifier] = "Collegata. La tabella è vuota."
+                    destinationMessages[identifier] = String(localized: "Connected. The table is empty.")
                 } else {
-                    destinationMessages[identifier] = "Collegata: \(summary.rowCount) righe. Aree: \(summary.areaNames.joined(separator: ", "))."
+                    destinationMessages[identifier] = String(localized: "Connected: \(summary.rowCount) rows. Areas: \(summary.areaNames.joined(separator: ", ")).")
                 }
             } catch {
                 destinationMessages[identifier] = FailureDescription.text(for: error)
@@ -110,11 +115,11 @@ final class SettingsModel {
             return
         }
         guard TokenStore.save(token, host: host) else {
-            tokenMessage = "Non riesco a salvare il token nel Portachiavi."
+            tokenMessage = String(localized: "Could not save the token to the Keychain.")
             return
         }
         tokenInputs[host] = ""
-        tokenMessage = "Token per \(host) salvato nel Portachiavi."
+        tokenMessage = String(localized: "Token for \(host) saved to the Keychain.")
         refreshTokenState()
         for destination in settings.destinations where destination.host == host {
             verify(destination.identifier)
@@ -127,14 +132,23 @@ final class SettingsModel {
         launchAtLogin = LaunchAtLogin.isEnabled
     }
 
+    var needsRestartToChangeLanguage: Bool {
+        language != launchLanguage
+    }
+
+    func setLanguage(_ language: AppLanguage) {
+        AppLanguage.select(language)
+        self.language = language
+    }
+
     func createPage() {
         let title = newPageTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !title.isEmpty else {
-            creationMessage = "Scrivi il titolo della nuova pagina."
+            creationMessage = String(localized: "Enter the title of the new page.")
             return
         }
         guard let parent = PageReference(pageAddress: newPageParentAddress) else {
-            creationMessage = "Indirizzo della pagina madre non riconosciuto."
+            creationMessage = String(localized: "Parent page address not recognized.")
             return
         }
         isCreating = true
@@ -148,13 +162,13 @@ final class SettingsModel {
                     title: title,
                     spaceKey: parentPage.spaceKey,
                     parentIdentifier: parent.pageIdentifier,
-                    storage: PageTemplate.storage()
+                    storage: PageTemplate.storage(language: .current)
                 )
                 let reference = PageReference(baseURL: parent.baseURL, pageIdentifier: pageIdentifier)
                 let destination = settings.addDestination(address: reference.viewURL.absoluteString, title: title)
                 settings.lastDestinationIdentifier = destination.identifier
                 newPageTitle = ""
-                creationMessage = "Pagina «\(title)» creata sotto «\(parentPage.title)» e aggiunta all'elenco."
+                creationMessage = String(localized: "Page “\(title)” created under “\(parentPage.title)” and added to the list.")
                 NSWorkspace.shared.open(reference.viewURL)
             } catch {
                 creationMessage = FailureDescription.text(for: error)
@@ -168,9 +182,9 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
-            Section("Pagine") {
+            Section("Pages") {
                 if model.settings.destinations.isEmpty {
-                    Text("Nessuna pagina: aggiungine una qui sotto o creane una dal modello.")
+                    Text("No pages: add one below or create one from the template.")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                 }
@@ -179,12 +193,12 @@ struct SettingsView: View {
                 }
                 HStack {
                     TextField(
-                        "Aggiungi",
+                        "Add",
                         text: $model.newAddress,
-                        prompt: Text("https://…/pages/viewpage.action?pageId=…")
+                        prompt: Text(verbatim: "https://…/pages/viewpage.action?pageId=…")
                     )
                     .onSubmit { model.addDestination() }
-                    Button("Aggiungi") { model.addDestination() }
+                    Button("Add") { model.addDestination() }
                         .disabled(model.newAddress.isEmpty)
                 }
                 if !model.listMessage.isEmpty {
@@ -192,9 +206,9 @@ struct SettingsView: View {
                 }
             }
 
-            Section("Token di accesso") {
+            Section("Access tokens") {
                 if model.hosts.isEmpty {
-                    Text("Aggiungi una pagina: qui comparirà il campo per il token del suo Confluence.")
+                    Text("Add a page: the field for its Confluence token will appear here.")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                 }
@@ -206,10 +220,14 @@ struct SettingsView: View {
                                 get: { model.tokenInputs[host] ?? "" },
                                 set: { model.tokenInputs[host] = $0 }
                             ),
-                            prompt: Text(model.hostsWithToken.contains(host) ? "Salvato nel Portachiavi" : "Incolla il token personale")
+                            prompt: Text(
+                                model.hostsWithToken.contains(host)
+                                    ? String(localized: "Saved in the Keychain")
+                                    : String(localized: "Paste the personal access token")
+                            )
                         )
                         .onSubmit { model.saveToken(forHost: host) }
-                        Button("Salva") { model.saveToken(forHost: host) }
+                        Button("Save") { model.saveToken(forHost: host) }
                             .disabled((model.tokenInputs[host] ?? "").isEmpty)
                     }
                 }
@@ -218,32 +236,47 @@ struct SettingsView: View {
                 }
             }
 
-            Section("Uso") {
-                LabeledContent("Scorciatoia") {
+            Section("Usage") {
+                LabeledContent("Shortcut") {
                     ShortcutRecorderView(
                         combination: model.settings.hotKey,
                         onRecordingChange: { model.onRecordingChange($0) },
                         onChange: { model.settings.hotKey = $0 }
                     )
                 }
-                Toggle("Avvia al login", isOn: Binding(
+                Toggle("Launch at login", isOn: Binding(
                     get: { model.launchAtLogin },
                     set: { model.setLaunchAtLogin($0) }
                 ))
+                Picker("Language", selection: Binding(
+                    get: { model.language },
+                    set: { model.setLanguage($0) }
+                )) {
+                    ForEach(AppLanguage.allCases, id: \.self) { language in
+                        Text(language.displayName).tag(language)
+                    }
+                }
+                if model.needsRestartToChangeLanguage {
+                    HStack {
+                        caption(String(localized: "The language changes when Snitch restarts."))
+                        Spacer()
+                        Button("Restart now") { model.onRestart() }
+                    }
+                }
             }
 
-            Section("Nuova pagina da modello") {
-                Text("Crea una pagina con la tabella vuota (\(PageTemplate.columnTitles.joined(separator: ", "))) e la aggiunge all'elenco.")
+            Section("New page from template") {
+                Text("Creates a page with the empty table (\(PageTemplate.columnTitles(in: .current).joined(separator: ", "))) and adds it to the list.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
-                TextField("Titolo", text: $model.newPageTitle, prompt: Text("Bug del progetto"))
+                TextField("Title", text: $model.newPageTitle, prompt: Text("Project bugs"))
                 TextField(
-                    "Pagina madre",
+                    "Parent page",
                     text: $model.newPageParentAddress,
-                    prompt: Text("Indirizzo della pagina sotto cui crearla")
+                    prompt: Text("Address of the page to create it under")
                 )
                 HStack {
-                    Button("Crea pagina") { model.createPage() }
+                    Button("Create page") { model.createPage() }
                         .disabled(model.isCreating)
                     if model.isCreating {
                         ProgressView().controlSize(.small)
@@ -281,14 +314,14 @@ struct SettingsView: View {
             if model.verifyingIdentifiers.contains(destination.identifier) {
                 ProgressView().controlSize(.small)
             }
-            Button("Verifica") { model.verify(destination.identifier) }
+            Button("Verify") { model.verify(destination.identifier) }
                 .disabled(model.verifyingIdentifiers.contains(destination.identifier))
             Button {
                 model.removeDestination(destination.identifier)
             } label: {
                 Image(systemName: "trash")
             }
-            .help("Togli la pagina dall'elenco (la pagina su Confluence non viene toccata)")
+            .help("Remove the page from the list (the page on Confluence is not touched)")
         }
     }
 
@@ -311,7 +344,7 @@ struct ShortcutRecorderView: View {
     private static let escapeKeyCode: UInt16 = 53
 
     var body: some View {
-        Button(isRecording ? "Premi la nuova scorciatoia…" : combination.display) {
+        Button(isRecording ? String(localized: "Press the new shortcut…") : combination.display) {
             if isRecording {
                 stopRecording()
             } else {

@@ -13,7 +13,7 @@ struct HotKeyCombination: Codable, Equatable {
     )
 
     private static let specialKeyNames: [Int: String] = [
-        kVK_Space: "Spazio",
+        kVK_Space: String(localized: "Space"),
         kVK_Return: "↩",
         kVK_Tab: "⇥",
         kVK_LeftArrow: "←",

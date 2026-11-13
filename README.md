@@ -1,123 +1,126 @@
 <a id="readme-top"></a>
 
 <div align="center">
-  <img src="Resources/AppIcon-source.png" alt="Icona di Snitch: una coccinella detective con la lente" width="180">
+  <img src="Resources/AppIcon-source.png" alt="Snitch icon: a detective ladybug holding a magnifying glass" width="180">
 
   <h1>Snitch</h1>
 
+  <p><strong>English</strong> · <a href="README.it.md">Italiano</a></p>
+
   <p>
-    <strong>Dal bug sullo schermo alla riga su Confluence, con una scorciatoia.</strong><br>
-    Un'app per la barra dei menu di macOS che cattura uno screenshot, chiede due parole di descrizione
-    e aggiunge la segnalazione alla tabella dei bug della tua pagina Confluence.
+    <strong>From the bug on your screen to the row on Confluence, with one shortcut.</strong><br>
+    A macOS menu bar app that captures a screenshot, asks for a short description
+    and adds the report to the bug table on your Confluence page.
   </p>
 
   <p>
-    <img src="https://img.shields.io/badge/macOS-15%2B-000000?logo=apple&logoColor=white" alt="macOS 15 o successivo">
+    <img src="https://img.shields.io/badge/macOS-15%2B-000000?logo=apple&logoColor=white" alt="macOS 15 or later">
     <img src="https://img.shields.io/badge/Swift-6.2-F05138?logo=swift&logoColor=white" alt="Swift 6.2">
     <img src="https://img.shields.io/badge/Confluence-Data%20Center-0052CC?logo=confluence&logoColor=white" alt="Confluence Data Center">
-    <img src="https://img.shields.io/badge/dipendenze-nessuna-2EA44F" alt="Nessuna dipendenza esterna">
-    <img src="https://img.shields.io/badge/versione-1.0-blue" alt="Versione 1.0">
+    <img src="https://img.shields.io/badge/dependencies-none-2EA44F" alt="No external dependencies">
+    <img src="https://img.shields.io/badge/version-1.0-blue" alt="Version 1.0">
   </p>
 
   <p>
-    <a href="https://github.com/p1e7r0/snitch/releases/latest"><strong>Scarica l'app</strong></a>
+    <a href="https://github.com/p1e7r0/snitch/releases/latest"><strong>Download the app</strong></a>
     ·
-    <a href="#per-iniziare">Per iniziare</a>
+    <a href="#getting-started">Getting started</a>
     ·
-    <a href="#uso">Uso</a>
+    <a href="#usage">Usage</a>
     ·
-    <a href="#la-pagina-su-confluence">La pagina su Confluence</a>
+    <a href="#the-confluence-page">The Confluence page</a>
     ·
-    <a href="#risoluzione-dei-problemi">Risoluzione dei problemi</a>
+    <a href="#troubleshooting">Troubleshooting</a>
   </p>
 </div>
 
 <details>
-  <summary>Indice</summary>
+  <summary>Table of contents</summary>
   <ol>
-    <li><a href="#il-progetto">Il progetto</a></li>
-    <li><a href="#come-funziona">Come funziona</a></li>
+    <li><a href="#the-project">The project</a></li>
+    <li><a href="#how-it-works">How it works</a></li>
     <li>
-      <a href="#per-iniziare">Per iniziare</a>
+      <a href="#getting-started">Getting started</a>
       <ul>
-        <li><a href="#prerequisiti">Prerequisiti</a></li>
-        <li><a href="#installazione">Installazione</a></li>
-        <li><a href="#configurazione">Configurazione</a></li>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Installation</a></li>
+        <li><a href="#configuration">Configuration</a></li>
       </ul>
     </li>
-    <li><a href="#uso">Uso</a></li>
-    <li><a href="#la-pagina-su-confluence">La pagina su Confluence</a></li>
-    <li><a href="#coda-e-tentativi">Coda e tentativi</a></li>
-    <li><a href="#dati-e-sicurezza">Dati e sicurezza</a></li>
-    <li><a href="#sviluppo">Sviluppo</a></li>
-    <li><a href="#disinstallazione">Disinstallazione</a></li>
-    <li><a href="#risoluzione-dei-problemi">Risoluzione dei problemi</a></li>
-    <li><a href="#licenza">Licenza</a></li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#the-confluence-page">The Confluence page</a></li>
+    <li><a href="#queue-and-retries">Queue and retries</a></li>
+    <li><a href="#data-and-security">Data and security</a></li>
+    <li><a href="#development">Development</a></li>
+    <li><a href="#uninstalling">Uninstalling</a></li>
+    <li><a href="#troubleshooting">Troubleshooting</a></li>
+    <li><a href="#license">License</a></li>
   </ol>
 </details>
 
-## Il progetto
+## The project
 
-Segnalare un bug mentre si sta facendo altro costa troppo: fare lo screenshot, aprire Confluence, entrare in modifica, caricare l'immagine, trovare l'ID successivo, salvare. Snitch riduce tutto a una scorciatoia e a una riga di testo, e si occupa del resto in sottofondo.
+Reporting a bug while you are busy with something else costs too much: take the screenshot, open Confluence, enter edit mode, upload the image, find the next ID, save. Snitch reduces all of that to a shortcut and a line of text, and takes care of the rest in the background.
 
-- **Una scorciatoia globale** (`⌃⌥⌘B`, modificabile) avvia la selezione dell'area di schermo da catturare.
-- **Un pannello minimale** chiede tipo (Bug o Feature), area e descrizione; `Invio` invia, `Esc` annulla.
-- **Più screenshot per segnalazione**: premi di nuovo la scorciatoia mentre il pannello è aperto.
-- **Più pagine di destinazione**, anche su Confluence diversi, ognuna con il proprio token.
-- **ID progressivo automatico** e stato iniziale «Aperto» in ogni nuova riga.
-- **Coda su disco**: se la rete o la VPN mancano, la segnalazione aspetta e parte da sola appena possibile.
-- **Nessuna riga doppia**, anche se l'invio viene interrotto a metà e ripetuto.
-- **Pagina pronta dal modello**: Snitch può creare per te la pagina con la tabella vuota.
-- **Nessuna dipendenza esterna**: solo Swift, AppKit e SwiftUI.
+- **A global shortcut** (`⌃⌥⌘B`, customizable) starts the selection of the screen area to capture.
+- **A minimal panel** asks for type (Bug or Feature), area and description; `Return` submits, `Esc` cancels.
+- **Several screenshots per report**: press the shortcut again while the panel is open.
+- **Several destination pages**, even on different Confluence instances, each with its own token.
+- **Automatic sequential ID** and initial status “Open” in every new row.
+- **On-disk queue**: if the network or the VPN is down, the report waits and goes out by itself as soon as possible.
+- **No duplicate rows**, even if the submission is interrupted halfway and repeated.
+- **Ready-made page from a template**: Snitch can create the page with the empty table for you.
+- **English and Italian**: the app follows the language of macOS, or the one you choose in the settings, and writes on each page in the language of its table.
+- **No external dependencies**: only Swift, AppKit and SwiftUI.
 
-<p align="right">(<a href="#readme-top">torna su</a>)</p>
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Come funziona
+## How it works
 
 ```mermaid
 flowchart LR
-    shortcut["Scorciatoia ⌃⌥⌘B"] --> capture["Selezione dell'area di schermo"]
-    capture --> panel["Pannello: tipo, area, descrizione"]
-    panel --> queue[("Coda su disco")]
-    queue --> reachable{"Confluence raggiungibile?"}
-    reachable -- sì --> upload["Carica gli screenshot come allegati"]
-    upload --> row["Aggiunge la riga alla tabella"]
-    row --> notification["Notifica con l'ID assegnato"]
-    reachable -- no --> wait["Riprova: da 15 s fino a 5 min"]
+    shortcut["Shortcut ⌃⌥⌘B"] --> capture["Screen area selection"]
+    capture --> panel["Panel: type, area, description"]
+    panel --> queue[("On-disk queue")]
+    queue --> reachable{"Confluence reachable?"}
+    reachable -- yes --> upload["Uploads the screenshots as attachments"]
+    upload --> row["Adds the row to the table"]
+    row --> notification["Notification with the assigned ID"]
+    reachable -- no --> wait["Retries: from 15 s up to 5 min"]
     wait --> queue
 ```
 
-Il codice è diviso in due moduli:
+The code is split into two modules:
 
-| Modulo | Contenuto |
+| Module | Contents |
 | --- | --- |
-| `SnitchCore` | Logica senza interfaccia: client REST di Confluence, lettura e modifica della tabella nel formato di archiviazione della pagina, coda su disco, invio con gestione dei conflitti. È la parte coperta dai test. |
-| `Snitch` | L'app: icona nella barra dei menu, scorciatoia globale, cattura dello schermo, pannello di segnalazione, impostazioni, Portachiavi, notifiche. |
+| `SnitchCore` | Logic without a user interface: Confluence REST client, reading and editing the table in the page's storage format, on-disk queue, submission with conflict handling. This is the part covered by tests. |
+| `Snitch` | The app: menu bar icon, global shortcut, screen capture, report panel, settings, Keychain, notifications. |
 
-<p align="right">(<a href="#readme-top">torna su</a>)</p>
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Per iniziare
+## Getting started
 
-### Prerequisiti
+### Prerequisites
 
-- macOS 15 o successivo.
-- Per l'app già compilata: un Mac con Apple Silicon.
-- Per compilare dai sorgenti: toolchain Swift 6.2 o successiva (inclusa in Xcode 26).
-- Un Confluence raggiungibile in HTTPS e un **personal access token**: Snitch si autentica con l'intestazione `Authorization: Bearer`, cioè con i token personali di Confluence Data Center.
-- Il permesso di modificare la pagina che conterrà le segnalazioni.
+- macOS 15 or later.
+- For the prebuilt app: a Mac with Apple Silicon.
+- To build from source: Swift toolchain 6.2 or later (included in Xcode 26).
+- A Confluence instance reachable over HTTPS and a **personal access token**: Snitch authenticates with the `Authorization: Bearer` header, that is, with Confluence Data Center personal access tokens.
+- Permission to edit the page that will hold the reports.
 
-### Installazione
+### Installation
 
-#### Scarica l'app
+#### Download the app
 
-1. Scarica `Snitch-1.0.dmg` dalla [pagina delle release](https://github.com/p1e7r0/snitch/releases/latest).
-2. Apri l'immagine disco e trascina Snitch nella cartella Applicazioni.
-3. Avvia Snitch. Al primo avvio macOS lo blocca, perché l'app non è notarizzata da Apple: apri Impostazioni di Sistema → Privacy e sicurezza, scorri fino all'avviso su Snitch e scegli **Apri comunque**.
+1. Download `Snitch-1.0.dmg` from the [releases page](https://github.com/p1e7r0/snitch/releases/latest).
+2. Open the disk image and drag Snitch to the Applications folder.
+3. Launch Snitch. On first launch macOS blocks it, because the app is not notarized by Apple: open System Settings → Privacy & Security, scroll down to the warning about Snitch and choose **Open Anyway**.
 
 > [!NOTE]
-> L'app distribuita ha una firma locale, senza identità di sviluppatore. Dopo un aggiornamento macOS chiede quindi di nuovo il permesso di registrazione dello schermo.
+> The distributed app is ad-hoc signed, without a developer identity. After an update, macOS therefore asks for the screen recording permission again.
 
-#### Compila dai sorgenti
+#### Build from source
 
 ```sh
 git clone https://github.com/p1e7r0/snitch.git
@@ -125,161 +128,167 @@ cd snitch
 ./Scripts/build-app.sh --install
 ```
 
-Lo script compila in modalità release, crea `build/Snitch.app`, lo firma e, con `--install`, lo copia in `/Applications` e lo avvia. Senza `--install` si ferma al bundle in `build/`.
+The script builds in release mode, creates `build/Snitch.app`, signs it and, with `--install`, copies it to `/Applications` and launches it. Without `--install` it stops at the bundle in `build/`.
 
 > [!NOTE]
-> Lo script firma l'app con una firma locale, senza identità di sviluppatore: l'app funziona, ma macOS chiederà di nuovo il permesso di registrazione dello schermo a ogni ricompilazione. Per usare una tua identità di firma, e conservare i permessi tra una compilazione e l'altra, indicala in `SNITCH_SIGNING_IDENTITY`.
+> The script signs the app ad hoc, without a developer identity: the app works, but macOS will ask for the screen recording permission again after every rebuild. To use your own signing identity, and keep the permissions from one build to the next, set it in `SNITCH_SIGNING_IDENTITY`.
 
-Per ottenere un'immagine disco da distribuire:
+To get a disk image to distribute:
 
 ```sh
 ./Scripts/make-dmg.sh
 ```
 
-Il risultato è `build/Snitch-<versione>.dmg`, con l'app e il collegamento ad Applicazioni.
+The result is `build/Snitch-<version>.dmg`, with the app and the link to Applications.
 
-### Configurazione
+### Configuration
 
-Al primo avvio, finché manca una pagina con il relativo token, Snitch apre da solo la finestra delle impostazioni.
+On first launch, as long as there is no page with its token, Snitch opens the settings window by itself.
 
-1. **Aggiungi una pagina.** Incolla l'indirizzo della pagina così come compare nel browser. Sono riconosciuti due formati, solo in `https`:
+1. **Add a page.** Paste the page address as it appears in the browser. Two formats are recognized, `https` only:
    ```text
    https://confluence.example.com/pages/viewpage.action?pageId=123456
-   https://confluence.example.com/spaces/CHIAVE/pages/123456/Titolo
+   https://confluence.example.com/spaces/KEY/pages/123456/Title
    ```
-   In alternativa usa **Nuova pagina da modello**: indica titolo e pagina madre, e Snitch crea la pagina con la tabella vuota e la aggiunge all'elenco.
-2. **Salva il token.** Per ogni host compare un campo dedicato; il token finisce nel Portachiavi di macOS.
-3. **Verifica.** Il pulsante «Verifica» conferma il collegamento e mostra quante righe e quali aree contiene la tabella.
-4. **Concedi il permesso di registrazione dello schermo.** Alla prima cattura macOS lo chiede; dopo averlo attivato in Impostazioni di Sistema → Privacy e sicurezza → Registrazione schermo e audio di sistema, riavvia Snitch.
+   Alternatively use **New page from template**: enter the title and the parent page, and Snitch creates the page with the empty table and adds it to the list.
+2. **Save the token.** A dedicated field appears for each host; the token ends up in the macOS Keychain.
+3. **Verify.** The “Verify” button confirms the connection and shows how many rows and which areas the table contains.
+4. **Grant the screen recording permission.** macOS asks for it on the first capture; after enabling it in System Settings → Privacy & Security → Screen & System Audio Recording, restart Snitch.
 
-Nelle impostazioni puoi anche cambiare la scorciatoia (serve almeno uno tra `⌘`, `⌃` e `⌥`) e l'avvio al login, che Snitch attiva da solo al primo avvio se si trova in una cartella Applicazioni.
+In the settings you can also change the shortcut (it needs at least one of `⌘`, `⌃` and `⌥`) and the launch at login, which Snitch enables by itself on first launch if it is located in an Applications folder.
 
-<p align="right">(<a href="#readme-top">torna su</a>)</p>
+Snitch is available in English and Italian. With **System language** it uses the first of your preferred macOS languages that it supports, and falls back to English. To choose one yourself, use the **Language** menu in the settings: the change takes effect when Snitch restarts, and **Restart now** does it for you.
 
-## Uso
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-1. Premi `⌃⌥⌘B`, oppure scegli **Nuova segnalazione** dal menu della coccinella nella barra dei menu.
-2. Trascina per selezionare l'area di schermo da catturare. `Esc` annulla.
-3. Nel pannello scegli **Tipo** (Bug o Feature) e **Area**, poi scrivi la **Descrizione**. L'elenco delle aree viene dalla tabella della pagina; puoi anche scriverne una nuova.
-4. Per aggiungere altri screenshot premi di nuovo la scorciatoia o **Aggiungi screenshot**.
-5. Premi `Invio`. Il pannello si chiude subito e l'invio prosegue in sottofondo.
-6. A riga inserita arriva una notifica con l'ID, per esempio «Bug 42 inserito». Un clic sulla notifica apre la pagina.
+## Usage
 
-Se hai configurato più pagine, il pannello mostra anche il menu **Pagina**; Snitch ricorda l'ultima pagina usata e l'ultima area di ciascuna.
+1. Press `⌃⌥⌘B`, or choose **New report** from the ladybug menu in the menu bar.
+2. Drag to select the screen area to capture. `Esc` cancels.
+3. In the panel choose **Type** (Bug or Feature) and **Area**, then write the **Description**. The list of areas comes from the table on the page; you can also type a new one.
+4. To add more screenshots press the shortcut again or **Add screenshot**.
+5. Press `Return`. The panel closes immediately and the submission continues in the background.
+6. Once the row is inserted, a notification arrives with the ID, for example “Bug 42 added”. Clicking the notification opens the page.
 
-Il menu della barra dei menu mostra inoltre:
+If you have configured several pages, the panel also shows the **Page** menu; Snitch remembers the last page used and the last area of each one.
 
-- il numero di segnalazioni in coda, accanto all'icona;
-- per ogni segnalazione in coda, il motivo per cui non è ancora partita e il comando per eliminarla;
-- **Riprova ora**, per non aspettare il tentativo successivo;
-- il collegamento diretto a ciascuna pagina di segnalazioni.
+The menu bar menu also shows:
 
-<p align="right">(<a href="#readme-top">torna su</a>)</p>
+- the number of queued reports, next to the icon;
+- for each queued report, the reason why it has not gone out yet and the command to delete it;
+- **Retry now**, to avoid waiting for the next attempt;
+- the direct link to each report page.
 
-## La pagina su Confluence
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-Snitch cerca nella pagina la prima tabella la cui riga di intestazione contiene queste colonne. I titoli sono confrontati senza distinguere maiuscole e minuscole; l'ordine è libero e le colonne in più vengono lasciate vuote.
+## The Confluence page
 
-| Colonna | Obbligatoria | Che cosa scrive Snitch |
-| --- | :---: | --- |
-| ID | sì | L'ID più alto della tabella, più uno |
-| Stato | sì | La macro di stato «Aperto», rossa |
-| Tipo | sì | «Bug» o «Feature» |
-| Area | sì | L'area scelta nel pannello |
-| Descrizione | sì | Il testo della segnalazione |
-| Immagini | sì | Gli screenshot come miniature da 150 px, ingrandibili con un clic |
-| Storia | no | Niente: resta a disposizione di chi lavora la segnalazione |
+Snitch looks in the page for the first table whose header row contains these columns. The titles can be all in English or all in Italian; they are compared case-insensitively, the order is free and any extra columns are left empty.
 
-La nuova riga va in fondo alla tabella, oppure nella prima delle righe vuote finali, se ce ne sono. La modifica è salvata come modifica minore, con un commento di versione del tipo `Snitch: Bug 42 in «Area»`.
+| Column | Italian title | Required | What Snitch writes |
+| --- | --- | :---: | --- |
+| ID | ID | yes | The highest ID in the table, plus one |
+| Status | Stato | yes | The “Open” status macro, in red |
+| Type | Tipo | yes | “Bug” or “Feature” |
+| Area | Area | yes | The area chosen in the panel |
+| Description | Descrizione | yes | The text of the report |
+| Images | Immagini | yes | The screenshots as 150 px thumbnails, enlargeable with a click |
+| History | Storia | no | Nothing: it stays available to whoever works on the report |
 
-La pagina creata dal modello contiene la stessa tabella, vuota, preceduta da un riquadro informativo con la legenda degli stati: «Aperto», «In corso» e «Risolto».
+The new row goes at the bottom of the table, or in the first of the trailing empty rows, if there are any. The change is saved as a minor edit, with a version comment such as `Snitch: Bug 42 in “Area”`.
 
-<p align="right">(<a href="#readme-top">torna su</a>)</p>
+The language of a page is the language of its column titles, whatever the language of the app: in a table with the Italian titles Snitch writes the status «Aperto» and the version comment `Snitch: Bug 42 in «Area»`. Pages created with earlier, Italian-only versions of Snitch keep working unchanged.
 
-## Coda e tentativi
+The page created from the template contains the same table, empty, preceded by an info panel with the status legend: “Open”, “In progress” and “Resolved”. It is written in the language the app is running in.
 
-Ogni segnalazione viene prima scritta su disco, in `~/Library/Application Support/Snitch/Queue`, e solo dopo inviata. Chiudere l'app o perdere la connessione non fa perdere niente.
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-- **Tentativi automatici.** Il primo dopo 15 secondi, poi a intervalli raddoppiati fino a un massimo di 5 minuti. Snitch riprova subito anche quando torna la rete, al risveglio del Mac e quando salvi un token.
-- **Invio ripetibile.** Gli allegati si chiamano `snitch-<identificativo>-<numero>.png`. Se la pagina li cita già, la segnalazione è considerata consegnata; se un allegato esiste già, non viene ricaricato. Un invio interrotto a metà non produce quindi righe doppie.
-- **Modifiche concorrenti.** Se qualcuno salva la pagina nel frattempo, Snitch la rilegge e riapplica la riga, fino a cinque volte per tentativo.
-- **Un host alla volta.** Se un Confluence non è raggiungibile o il suo token non è valido, le segnalazioni per gli altri host partono comunque.
+## Queue and retries
 
-<p align="right">(<a href="#readme-top">torna su</a>)</p>
+Every report is first written to disk, in `~/Library/Application Support/Snitch/Queue`, and only then sent. Quitting the app or losing the connection does not lose anything.
 
-## Dati e sicurezza
+- **Automatic retries.** The first after 15 seconds, then at doubling intervals up to a maximum of 5 minutes. Snitch also retries immediately when the network comes back, when the Mac wakes up and when you save a token.
+- **Repeatable submission.** Attachments are named `snitch-<identifier>-<number>.png`. If the page already references them, the report is considered delivered; if an attachment already exists, it is not uploaded again. A submission interrupted halfway therefore does not produce duplicate rows.
+- **Concurrent edits.** If someone saves the page in the meantime, Snitch reads it again and reapplies the row, up to five times per attempt.
+- **One host at a time.** If a Confluence instance is unreachable or its token is not valid, the reports for the other hosts go out anyway.
 
-- I token stanno solo nel Portachiavi di macOS, uno per host, sotto il servizio `local.snitch.confluence`.
-- La cartella della coda è leggibile solo dal tuo utente ed è esclusa dai backup.
-- Le richieste a Confluence usano una sessione senza cookie e senza cache, e non seguono i reindirizzamenti.
-- Sono accettati solo indirizzi `https`.
-- Le bozze abbandonate, cioè screenshot catturati senza inviare la segnalazione, vengono eliminate all'avvio successivo.
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<p align="right">(<a href="#readme-top">torna su</a>)</p>
+## Data and security
 
-## Sviluppo
+- Tokens are stored only in the macOS Keychain, one per host, under the service `local.snitch.confluence`.
+- The queue folder is readable only by your user and is excluded from backups.
+- Requests to Confluence use a session without cookies and without cache, and do not follow redirects.
+- Only `https` addresses are accepted.
+- Abandoned drafts, that is, screenshots captured without submitting the report, are deleted at the next launch.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Development
 
 ```sh
 swift build
 swift test
 ```
 
-I test, scritti con Swift Testing, coprono `SnitchCore`: analisi e modifica della tabella, client REST e flusso di invio.
+The tests, written with Swift Testing, cover `SnitchCore`: table parsing and editing, REST client and submission flow.
+
+The strings in the code are in English and double as translation keys; the Italian text is in `Resources/it.lproj/Localizable.strings`, which `build-app.sh` copies into the app bundle. An app started with `swift run`, outside the bundle, is always in English.
 
 ```text
 snitch/
 ├── Package.swift
-├── Resources/            Info.plist, icona dell'app e immagine sorgente
+├── Resources/            Info.plist, app icon, source image and Italian translation
 ├── Scripts/
-│   ├── build-app.sh      compila, firma e, con --install, installa l'app
-│   ├── make-dmg.sh       crea l'immagine disco
-│   ├── make-icon.sh      rigenera AppIcon.icns dall'immagine sorgente
-│   └── uninstall-app.sh  rimuove app, dati, token e permessi
+│   ├── build-app.sh      builds, signs and, with --install, installs the app
+│   ├── make-dmg.sh       creates the disk image
+│   ├── make-icon.sh      regenerates AppIcon.icns from the source image
+│   └── uninstall-app.sh  removes app, data, tokens and permissions
 ├── Sources/
-│   ├── Snitch/           l'app per la barra dei menu
-│   └── SnitchCore/       logica di Confluence e della coda
+│   ├── Snitch/           the menu bar app
+│   └── SnitchCore/       Confluence and queue logic
 └── Tests/
     └── SnitchCoreTests/
 ```
 
-Per cambiare l'icona sostituisci `Resources/AppIcon-source.png`, oppure passa un'altra immagine come argomento, ed esegui:
+To change the icon replace `Resources/AppIcon-source.png`, or pass another image as an argument, and run:
 
 ```sh
 ./Scripts/make-icon.sh
 ```
 
-<p align="right">(<a href="#readme-top">torna su</a>)</p>
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Disinstallazione
+## Uninstalling
 
 ```sh
 ./Scripts/uninstall-app.sh
 ```
 
-Lo script chiude Snitch e rimuove l'app da `/Applications`, la coda con i suoi screenshot, i token dal Portachiavi, le preferenze e il permesso di registrazione dello schermo. Se ci sono segnalazioni non ancora inviate chiede conferma; `--force` la salta.
+The script quits Snitch and removes the app from `/Applications`, the queue with its screenshots, the tokens from the Keychain, the preferences and the screen recording permission. If there are reports not yet sent it asks for confirmation; `--force` skips it.
 
-<p align="right">(<a href="#readme-top">torna su</a>)</p>
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Risoluzione dei problemi
+## Troubleshooting
 
-Il motivo per cui una segnalazione è ferma si legge nel menu della barra dei menu, nel sottomenu della segnalazione stessa.
+The reason why a report is stuck can be read in the menu bar menu, in the submenu of the report itself.
 
-| Messaggio | Che cosa fare |
+| Message | What to do |
 | --- | --- |
-| Confluence non è raggiungibile (rete o VPN assente) | Niente: Snitch riprova da solo quando torna la connessione |
-| Manca il token di accesso per *host* | Salva il token per quell'host nelle impostazioni |
-| Token non valido o scaduto | Crea un nuovo personal access token e salvalo nelle impostazioni |
-| Non hai il permesso di modificare la pagina | Chiedi il permesso di modifica sulla pagina o sullo spazio |
-| Pagina non trovata, o non hai il permesso di vederla | Controlla l'indirizzo della pagina nelle impostazioni |
-| Nella pagina non trovo la tabella con le colonne… | Aggiungi alla tabella le colonne obbligatorie, o crea una pagina dal modello |
-| La pagina continua a essere modificata da altri | Niente: Snitch riprova al tentativo successivo |
+| Confluence is unreachable (no network or VPN) | Nothing: Snitch retries by itself when the connection comes back |
+| The access token for *host* is missing | Save the token for that host in the settings |
+| Invalid or expired token | Create a new personal access token and save it in the settings |
+| You do not have permission to edit the page | Ask for edit permission on the page or on the space |
+| Page not found, or you do not have permission to view it | Check the page address in the settings |
+| The page has no table with the columns… | Add the required columns to the table, or create a page from the template |
+| The page keeps being edited by others | Nothing: Snitch retries at the next attempt |
 
-Se la scorciatoia non apre la selezione dello schermo, controlla che Snitch sia attivo in Impostazioni di Sistema → Privacy e sicurezza → Registrazione schermo e audio di sistema, e riavvialo.
+If the shortcut does not open the screen selection, check that Snitch is enabled in System Settings → Privacy & Security → Screen & System Audio Recording, and restart it.
 
-<p align="right">(<a href="#readme-top">torna su</a>)</p>
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Licenza
+## License
 
-Il repository non contiene ancora un file di licenza.
+The repository does not contain a license file yet.
 
-<p align="right">(<a href="#readme-top">torna su</a>)</p>
+<p align="right">(<a href="#readme-top">back to top</a>)</p>

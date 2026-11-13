@@ -62,8 +62,8 @@ struct ReportView: View {
             Grid(alignment: .leading, horizontalSpacing: 10, verticalSpacing: 10) {
                 if model.destinationOptions.count > 1 {
                     GridRow {
-                        Text("Pagina")
-                        Picker("Pagina", selection: $model.selectedDestinationIdentifier) {
+                        Text("Page")
+                        Picker("Page", selection: $model.selectedDestinationIdentifier) {
                             ForEach(model.destinationOptions, id: \.identifier) { option in
                                 Text(option.name).tag(option.identifier)
                             }
@@ -74,9 +74,9 @@ struct ReportView: View {
                     }
                 }
                 GridRow {
-                    Text("Tipo")
+                    Text("Type")
                         .gridColumnAlignment(.trailing)
-                    Picker("Tipo", selection: $model.kind) {
+                    Picker("Type", selection: $model.kind) {
                         ForEach(ReportKind.allCases, id: \.self) { kind in
                             Text(kind.rawValue).tag(kind)
                         }
@@ -95,8 +95,8 @@ struct ReportView: View {
                     .frame(width: 260)
                 }
                 GridRow {
-                    Text("Descrizione")
-                    TextField("Che cosa non va?", text: $model.comment)
+                    Text("Description")
+                    TextField("What is wrong?", text: $model.comment)
                         .textFieldStyle(.roundedBorder)
                         .focused($isCommentFocused)
                         .onSubmit { model.onSend() }
@@ -111,11 +111,11 @@ struct ReportView: View {
             }
 
             HStack {
-                Button("Aggiungi screenshot") { model.onAddScreenshot() }
+                Button("Add screenshot") { model.onAddScreenshot() }
                 Spacer()
-                Button("Annulla") { model.onCancel() }
+                Button("Cancel") { model.onCancel() }
                     .keyboardShortcut(.cancelAction)
-                Button("Invia") { model.onSend() }
+                Button("Send") { model.onSend() }
                     .keyboardShortcut(.defaultAction)
                     .disabled(!model.canSend)
             }
@@ -145,7 +145,7 @@ struct ReportView: View {
                     }
                     .buttonStyle(.plain)
                     .padding(4)
-                    .help("Rimuovi questo screenshot")
+                    .help("Remove this screenshot")
                 }
             }
     }
@@ -165,7 +165,7 @@ struct AreaComboBox: NSViewRepresentable {
         comboBox.usesDataSource = false
         comboBox.completes = true
         comboBox.numberOfVisibleItems = 10
-        comboBox.placeholderString = "Scegli o scrivi un'area"
+        comboBox.placeholderString = String(localized: "Choose or type an area")
         comboBox.delegate = context.coordinator
         return comboBox
     }

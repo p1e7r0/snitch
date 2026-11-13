@@ -6,6 +6,12 @@ enum Fixture {
 
     static let openStatus = #"<ac:structured-macro ac:name="status" ac:schema-version="1"><ac:parameter ac:name="colour">Red</ac:parameter><ac:parameter ac:name="title">Aperto</ac:parameter></ac:structured-macro>"#
 
+    static let englishHeaderRow = "<tr><th>ID</th><th>Status</th><th>Type</th><th>Area</th><th>Description</th><th>Images</th><th>History</th></tr>"
+
+    static let englishOpenStatus = #"<ac:structured-macro ac:name="status" ac:schema-version="1"><ac:parameter ac:name="colour">Red</ac:parameter><ac:parameter ac:name="title">Open</ac:parameter></ac:structured-macro>"#
+
+    static let englishPage = "<table><tbody>\(englishHeaderRow)</tbody></table>"
+
     static let blankRow = "<tr><td><br /></td><td><br /></td><td><br /></td><td><br /></td><td><br /></td><td><div class=\"content-wrapper\"><br /></div></td><td><br /></td></tr>"
 
     static let lastRow = dataRow(identifier: 4, kind: "Feature", area: "Profilo", description: "Foto del profilo")

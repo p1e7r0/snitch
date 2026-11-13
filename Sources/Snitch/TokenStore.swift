@@ -15,7 +15,7 @@ enum TokenStore {
         SecItemDelete(query as CFDictionary)
         var attributes = query
         attributes[kSecValueData as String] = Data(token.utf8)
-        attributes[kSecAttrLabel as String] = "Snitch: token di Confluence (\(host))"
+        attributes[kSecAttrLabel as String] = String(localized: "Snitch: Confluence token (\(host))")
         return SecItemAdd(attributes as CFDictionary, nil) == errSecSuccess
     }
 

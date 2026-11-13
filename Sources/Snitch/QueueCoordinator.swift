@@ -100,7 +100,9 @@ final class QueueCoordinator {
                 retryDelay = Self.initialRetryDelay
                 let label = result.identifier.map { "\(report.kind.rawValue) \($0)" } ?? report.kind.rawValue
                 notifier.notify(
-                    title: report.kind == .feature ? "\(label) inserita" : "\(label) inserito",
+                    title: report.kind == .feature
+                        ? String(localized: "notification.added.feature", defaultValue: "\(label) added")
+                        : String(localized: "notification.added.bug", defaultValue: "\(label) added"),
                     subtitle: settings.pageLabel(for: report.destination),
                     body: "\(report.areaName) · \(report.comment)",
                     pageURL: report.destination.viewURL
@@ -111,7 +113,7 @@ final class QueueCoordinator {
                 failures[report.identifier] = description
                 if previousDescription != description {
                     notifier.notify(
-                        title: "Segnalazione in coda, riprovo da solo",
+                        title: String(localized: "Report queued, retrying automatically"),
                         subtitle: settings.pageLabel(for: report.destination),
                         body: description,
                         pageURL: nil

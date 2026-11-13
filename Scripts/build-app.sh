@@ -14,12 +14,13 @@ mkdir -p "$application_bundle/Contents/MacOS" "$application_bundle/Contents/Reso
 cp "$binary_directory/Snitch" "$application_bundle/Contents/MacOS/Snitch"
 cp "$project_directory/Resources/Info.plist" "$application_bundle/Contents/Info.plist"
 cp "$project_directory/Resources/AppIcon.icns" "$application_bundle/Contents/Resources/AppIcon.icns"
+cp -R "$project_directory"/Resources/*.lproj "$application_bundle/Contents/Resources/"
 
 signing_identity="${SNITCH_SIGNING_IDENTITY:--}"
 codesign --force --sign "$signing_identity" "$application_bundle"
 codesign --verify "$application_bundle"
 if [ "$signing_identity" = "-" ]; then
-    echo "Firma locale senza identità: i permessi di sistema andranno ridati a ogni ricompilazione."
+    echo "Ad-hoc signature without an identity: system permissions must be granted again after every rebuild."
 fi
 
 if [ "${1:-}" = "--install" ]; then
@@ -30,7 +31,7 @@ if [ "${1:-}" = "--install" ]; then
     rm -rf "$installed_bundle"
     cp -R "$application_bundle" "$installed_bundle"
     open "$installed_bundle"
-    echo "Installato e avviato: $installed_bundle"
+    echo "Installed and launched: $installed_bundle"
 else
-    echo "Creato: $application_bundle"
+    echo "Created: $application_bundle"
 fi

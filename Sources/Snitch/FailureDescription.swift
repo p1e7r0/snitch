@@ -7,37 +7,45 @@ enum FailureDescription {
         case let error as ConfigurationError:
             switch error {
             case .missingToken(let host):
-                return "Manca il token di accesso per \(host): salvalo nelle impostazioni."
+                return String(localized: "The access token for \(host) is missing: save it in the settings.")
             case .unrecognizedAddress:
-                return "Indirizzo della pagina non riconosciuto."
+                return String(localized: "Page address not recognized.")
             }
         case let error as ConfluenceError:
             switch error {
             case .network:
-                return "Confluence non è raggiungibile (rete o VPN assente)."
+                return String(localized: "Confluence is unreachable (no network or VPN).")
             case .authentication:
-                return "Token non valido o scaduto: aggiornalo nelle impostazioni."
+                return String(localized: "Invalid or expired token: update it in the settings.")
             case .forbidden:
-                return "Non hai il permesso di modificare la pagina."
+                return String(localized: "You do not have permission to edit the page.")
             case .notFound:
-                return "Pagina non trovata, o non hai il permesso di vederla."
+                return String(localized: "Page not found, or you do not have permission to view it.")
             case .versionConflict:
-                return "La pagina è stata modificata nel frattempo."
+                return String(localized: "The page was edited in the meantime.")
             case .server(let status, let message):
-                return message.isEmpty ? "Errore di Confluence (\(status))." : "Errore di Confluence (\(status)): \(message)"
+                return message.isEmpty
+                    ? String(localized: "Confluence error (\(status)).")
+                    : String(localized: "Confluence error (\(status)): \(message)")
             case .unexpectedResponse:
-                return "Risposta di Confluence non riconosciuta."
+                return String(localized: "Unrecognized response from Confluence.")
             }
         case BugPageError.tableNotFound:
             return missingTableText
         case SubmissionError.tooManyConflicts:
-            return "La pagina continua a essere modificata da altri."
+            return String(localized: "The page keeps being edited by others.")
         default:
-            return "Errore locale: \(error.localizedDescription)"
+            return String(localized: "Local error: \(error.localizedDescription)")
         }
     }
 
     static var missingTableText: String {
-        "Nella pagina non trovo la tabella con le colonne \(BugPage.requiredColumnTitles.joined(separator: ", "))."
+        let currentLanguage = PageLanguage.current
+        let columnTitles = BugPage.requiredColumnTitles(in: currentLanguage).joined(separator: ", ")
+        let alternativeColumnTitles = PageLanguage.allCases
+            .filter { $0 != currentLanguage }
+            .map { BugPage.requiredColumnTitles(in: $0).joined(separator: ", ") }
+            .joined(separator: "; ")
+        return String(localized: "The page has no table with the columns \(columnTitles), or with \(alternativeColumnTitles).")
     }
 }

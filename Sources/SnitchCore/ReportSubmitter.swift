@@ -43,7 +43,7 @@ public struct ReportSubmitter: Sendable {
                 try await service.updatePage(
                     page,
                     storage: insertion.storage,
-                    message: "Snitch: \(report.kind.rawValue) \(insertion.identifier) in «\(report.areaName)»"
+                    message: "Snitch: \(report.kind.rawValue) \(insertion.identifier) in \(insertion.language.vocabulary.quoted(report.areaName))"
                 )
                 return SubmissionResult(identifier: insertion.identifier)
             } catch ConfluenceError.versionConflict {

@@ -65,8 +65,8 @@ final class ReportFlow: NSObject, NSWindowDelegate {
         }
         guard let draft = try? store.createDraft() else {
             Alerts.run(
-                title: "Impossibile preparare la segnalazione",
-                text: "Non riesco a scrivere nella cartella dell'applicativo."
+                title: String(localized: "Unable to prepare the report"),
+                text: String(localized: "Could not write to the application folder.")
             )
             return
         }
@@ -113,7 +113,7 @@ final class ReportFlow: NSObject, NSWindowDelegate {
             backing: .buffered,
             defer: false
         )
-        panel.title = "Nuova segnalazione"
+        panel.title = String(localized: "New report")
         panel.isFloatingPanel = true
         panel.level = .floating
         panel.hidesOnDeactivate = false
@@ -200,7 +200,7 @@ final class ReportFlow: NSObject, NSWindowDelegate {
                 destination: reference
             )
         } catch {
-            session.model.notice = "Non riesco a salvare la segnalazione: \(error.localizedDescription)"
+            session.model.notice = String(localized: "Could not save the report: \(error.localizedDescription)")
             return
         }
         settings.lastDestinationIdentifier = destinationIdentifier
@@ -250,9 +250,11 @@ final class ReportFlow: NSObject, NSWindowDelegate {
             let notice: String?
             do {
                 let summary = try await settings.refreshDestination(withIdentifier: destinationIdentifier)
-                notice = summary.hasTable ? nil : "\(FailureDescription.missingTableText) La segnalazione resterà in coda."
+                notice = summary.hasTable
+                    ? nil
+                    : String(localized: "\(FailureDescription.missingTableText) The report will stay in the queue.")
             } catch {
-                notice = "Elenco delle aree non aggiornato. \(FailureDescription.text(for: error)) La segnalazione resterà in coda."
+                notice = String(localized: "Area list not updated. \(FailureDescription.text(for: error)) The report will stay in the queue.")
             }
             guard !Task.isCancelled,
                   self.session === session,
@@ -279,9 +281,9 @@ final class ReportFlow: NSObject, NSWindowDelegate {
         }
         ScreenCapture.requestPermission()
         let response = Alerts.run(
-            title: "Serve il permesso di registrare lo schermo",
-            text: "Attiva Snitch in Impostazioni di Sistema → Privacy e sicurezza → Registrazione schermo e audio di sistema, poi riavvia Snitch.",
-            buttons: ["Apri Impostazioni di Sistema", "Annulla"]
+            title: String(localized: "Screen recording permission required"),
+            text: String(localized: "Enable Snitch in System Settings → Privacy & Security → Screen & System Audio Recording, then restart Snitch."),
+            buttons: [String(localized: "Open System Settings"), String(localized: "Cancel")]
         )
         if response == .alertFirstButtonReturn,
            let settingsURL = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture") {

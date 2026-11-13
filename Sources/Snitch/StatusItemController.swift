@@ -50,18 +50,22 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
-        menu.addItem(makeActionItem(title: "Nuova segnalazione (\(settings.hotKey.display))") { [weak self] in
+        menu.addItem(makeActionItem(title: String(localized: "New report (\(settings.hotKey.display))")) { [weak self] in
             self?.onReport()
         })
 
         let pendingItems = coordinator.pendingItems
         if !pendingItems.isEmpty {
             menu.addItem(.separator())
-            menu.addItem(disabledItem(pendingItems.count == 1 ? "1 segnalazione in coda" : "\(pendingItems.count) segnalazioni in coda"))
+            menu.addItem(disabledItem(
+                pendingItems.count == 1
+                    ? String(localized: "1 report queued")
+                    : String(localized: "\(pendingItems.count) reports queued")
+            ))
             for pendingItem in pendingItems {
                 menu.addItem(makeItem(for: pendingItem))
             }
-            menu.addItem(makeActionItem(title: "Riprova ora") { [weak self] in
+            menu.addItem(makeActionItem(title: String(localized: "Retry now")) { [weak self] in
                 self?.coordinator.retryNow()
             })
         }
@@ -71,16 +75,18 @@ final class StatusItemController: NSObject, NSMenuDelegate {
             destination.reference.map { (name: destination.displayName, url: $0.viewURL) }
         }
         for page in pageURLs {
-            let title = pageURLs.count == 1 ? "Apri la pagina delle segnalazioni" : "Apri «\(page.name)»"
+            let title = pageURLs.count == 1
+                ? String(localized: "Open the reports page")
+                : String(localized: "Open “\(page.name)”")
             menu.addItem(makeActionItem(title: title) {
                 NSWorkspace.shared.open(page.url)
             })
         }
-        menu.addItem(makeActionItem(title: "Impostazioni…") { [weak self] in
+        menu.addItem(makeActionItem(title: String(localized: "Settings…")) { [weak self] in
             self?.onOpenSettings()
         })
         menu.addItem(.separator())
-        menu.addItem(makeActionItem(title: "Esci da Snitch") {
+        menu.addItem(makeActionItem(title: String(localized: "Quit Snitch")) {
             NSApp.terminate(nil)
         })
     }
@@ -93,10 +99,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         }
         let item = NSMenuItem(title: "\(report.kind.rawValue) · \(report.areaName): \(title)", action: nil, keyEquivalent: "")
         let submenu = NSMenu()
-        submenu.addItem(disabledItem(pendingItem.failure ?? "In attesa di invio"))
+        submenu.addItem(disabledItem(pendingItem.failure ?? String(localized: "Waiting to be sent")))
         submenu.addItem(.separator())
 
-        submenu.addItem(makeActionItem(title: "Elimina la segnalazione…") { [weak self] in
+        submenu.addItem(makeActionItem(title: String(localized: "Delete the report…")) { [weak self] in
             self?.confirmDiscard(report)
         })
         item.submenu = submenu
@@ -105,9 +111,9 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
     private func confirmDiscard(_ report: Report) {
         let response = Alerts.run(
-            title: "Eliminare la segnalazione in coda?",
-            text: "«\(report.comment)» e i suoi screenshot verranno cancellati senza essere inviati.",
-            buttons: ["Elimina", "Annulla"]
+            title: String(localized: "Delete the queued report?"),
+            text: String(localized: "“\(report.comment)” and its screenshots will be deleted without being sent."),
+            buttons: [String(localized: "Delete"), String(localized: "Cancel")]
         )
         if response == .alertFirstButtonReturn {
             coordinator.discard(report)
