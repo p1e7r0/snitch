@@ -128,7 +128,7 @@ cd snitch
 Lo script compila in modalità release, crea `build/Snitch.app`, lo firma e, con `--install`, lo copia in `/Applications` e lo avvia. Senza `--install` si ferma al bundle in `build/`.
 
 > [!NOTE]
-> Per la firma lo script usa la prima identità «Apple Development» che trova nel Portachiavi, oppure quella indicata in `SNITCH_SIGNING_IDENTITY`. Se non ne trova nessuna ripiega su una firma locale: l'app funziona, ma macOS chiederà di nuovo il permesso di registrazione dello schermo a ogni ricompilazione.
+> Lo script firma l'app con una firma locale, senza identità di sviluppatore: l'app funziona, ma macOS chiederà di nuovo il permesso di registrazione dello schermo a ogni ricompilazione. Per usare una tua identità di firma, e conservare i permessi tra una compilazione e l'altra, indicala in `SNITCH_SIGNING_IDENTITY`.
 
 Per ottenere un'immagine disco da distribuire:
 
@@ -136,7 +136,7 @@ Per ottenere un'immagine disco da distribuire:
 ./Scripts/make-dmg.sh
 ```
 
-Il risultato è `build/Snitch-<versione>.dmg`, con l'app e il collegamento ad Applicazioni. Per ottenere una firma locale senza identità, come nelle release, imposta `SNITCH_SIGNING_IDENTITY=-` prima del comando.
+Il risultato è `build/Snitch-<versione>.dmg`, con l'app e il collegamento ad Applicazioni.
 
 ### Configurazione
 
